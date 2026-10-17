@@ -27,7 +27,7 @@ export function SignupInput() {
       const responce = await api.post("/api/adduser", {
         username, password, goal
       })
-      console.log("res", responce);
+    
 
       if( responce.status === 201 ) {
         setUsername("")
@@ -36,7 +36,7 @@ export function SignupInput() {
         return
       }
     } catch (error: any) {
-      console.log("api error", error);
+    
       
       setError(error.response?.data?.message || "Login failed. Please try again.");
     }

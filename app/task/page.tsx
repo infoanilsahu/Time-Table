@@ -31,11 +31,9 @@ export default async function Tasks({ searchParams }: TasksProps) {
     await connectDB();
 
     const isComplete = complete === "true";
-    console.log("complete: ", isComplete);
     
 
     const res = await GetTask(date ?? "", isComplete);
-    console.log(res);
 
     const percen = res.todos === 0 ? 0 : Math.floor(res.complete/res.todos*100)
     
@@ -110,10 +108,22 @@ async function GetTask(date: string, complete: boolean) {
     };
 
     const sortTasks = (tasks: any[]) =>
-        tasks.sort(
-            (a, b) =>
-                priorityOrder[a.priority] - priorityOrder[b.priority]
-        );
+        tasks.sort((a, b) => {
+            // 1. Priority: high > medium > low > normal
+            const priorityDifference =
+                (priorityOrder[a.priority] ?? 5) -
+                (priorityOrder[b.priority] ?? 5);
+
+            if (priorityDifference !== 0) {
+                return priorityDifference;
+            }
+
+            // 2. CreatedAt: newest first
+            return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            );
+        });
 
     if( complete ) {
         const completed = await Todo.find({

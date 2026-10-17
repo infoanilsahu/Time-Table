@@ -54,7 +54,6 @@ export function TodoList({
 
   async function taskHandle(id:string, complete: boolean) {
     try {
-        console.log("tashan: ", id, complete, !complete);
         
         const res = await api.patch(`/api/todo/${id}/complete`, { completed: !complete })
         if( res.status === 200 ) {

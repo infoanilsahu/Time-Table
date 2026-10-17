@@ -26,8 +26,7 @@ export function LoginInput() {
       const responce = await api.post("/api/login", {
         username, password
       })
-      console.log("res", responce);
-
+  
       if( responce.status === 200 ) {
         setUsername("")
         setPassword("")
@@ -35,7 +34,7 @@ export function LoginInput() {
         return
       }
     } catch (error: any) {
-      console.log("api error", error);
+  
       
       setError(error.response?.data?.message || "Login failed. Please try again.");
     }
