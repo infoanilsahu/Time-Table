@@ -1,7 +1,7 @@
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-[#403746] p-4 sm:p-6">
+    <div className="min-h-screen">
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-115 flex-col bg-white">
         {/* Header */}
         <div className="flex h-22 items-center justify-between bg-black px-5">
