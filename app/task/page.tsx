@@ -102,21 +102,40 @@ async function GetTask(date: string, complete: boolean) {
         };
     }));
 
+    const priorityOrder: Record<string, number> = {
+        high: 1,
+        medium: 2,
+        low: 3,
+        normal: 4,
+    };
+
+    const sortTasks = (tasks: any[]) =>
+        tasks.sort(
+            (a, b) =>
+                priorityOrder[a.priority] - priorityOrder[b.priority]
+        );
+
     if( complete ) {
         const completed = await Todo.find({
             user: user._id,
             date,
-            completed: complete
-        }).lean().then(docs => docs.map(doc => {
-            const plain = doc as any;
-            return {
-                ...plain,
-                _id: plain._id?.toString() || plain._id,
-                user: plain.user?.toString() || plain.user,
-                createdAt: plain.createdAt?.toString() || plain.createdAt,
-                updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
-            };
-        }))
+            completed: complete,
+        })
+            .lean()
+            .then(docs =>
+                docs.map(doc => {
+                    const plain = doc as any;
+                    return {
+                        ...plain,
+                        _id: plain._id?.toString() || plain._id,
+                        user: plain.user?.toString() || plain.user,
+                        createdAt: plain.createdAt?.toString() || plain.createdAt,
+                        updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
+                    };
+                })
+            );
+
+        sortTasks(completed);
 
         return {
             todos: todos.length,
@@ -130,17 +149,23 @@ async function GetTask(date: string, complete: boolean) {
         const uncompleted = await Todo.find({
             user: user._id,
             date,
-            completed: complete
-        }).lean().then(docs => docs.map(doc => {
-            const plain = doc as any;
-            return {
-                ...plain,
-                _id: plain._id?.toString() || plain._id,
-                user: plain.user?.toString() || plain.user,
-                createdAt: plain.createdAt?.toString() || plain.createdAt,
-                updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
-            };
-        }))
+            completed: complete,
+        })
+            .lean()
+            .then(docs =>
+                docs.map(doc => {
+                    const plain = doc as any;
+                    return {
+                        ...plain,
+                        _id: plain._id?.toString() || plain._id,
+                        user: plain.user?.toString() || plain.user,
+                        createdAt: plain.createdAt?.toString() || plain.createdAt,
+                        updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
+                    };
+                })
+            );
+
+        sortTasks(uncompleted);
 
         return {
             todos: todos.length,

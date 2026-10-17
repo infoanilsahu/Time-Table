@@ -66,7 +66,7 @@ export function TodoList({
   }
 
   return (
-    <div className="w-full p-2 bg-white text-[14px] text-gray-900">
+    <div className="w-full p-2 bg-white text-[14px] text-gray-900 mb-40">
       {todos.map((todo) => {
         const id = String(todo._id);
         const selected = selectedId === id;
@@ -99,7 +99,7 @@ export function TodoList({
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
-                
+                <span className={`${todo.priority === "high" ? "bg-red-600 text-red-600" : todo.priority === "medium" ? "bg-yellow-400 text-yellow-400" : todo.priority === "low" ?  "bg-green-500 text-green-500" : "bg-none hidden"} w-5 rounded-2xl`}>.</span>
               </div>
             </div>
 

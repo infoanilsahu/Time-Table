@@ -17,7 +17,6 @@ export function LoginInput() {
 
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
-
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -30,6 +29,8 @@ export function LoginInput() {
       console.log("res", responce);
 
       if( responce.status === 200 ) {
+        setUsername("")
+        setPassword("")
         router.push("/");
         return
       }

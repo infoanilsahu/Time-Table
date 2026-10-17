@@ -3,26 +3,53 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Target, UserRound, LockKeyhole } from "lucide-react";
+import { api } from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 export function SignupInput() {
+
+  const router = useRouter()
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [goal, setGoal] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    console.log({ username, password, goal });
+    
+    try {
+      const responce = await api.post("/api/adduser", {
+        username, password, goal
+      })
+      console.log("res", responce);
 
-    // Connect your authentication API here.
+      if( responce.status === 201 ) {
+        setUsername("")
+        setPassword("")
+        router.push("/login");
+        return
+      }
+    } catch (error: any) {
+      console.log("api error", error);
+      
+      setError(error.response?.data?.message || "Login failed. Please try again.");
+    }
+    finally {
+      setLoading(false)
+    }
   }
 
   return (
     <main className="flex items-center justify-center bg-white px-4 py-10 text-black">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-10">
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleSignup} className="space-y-5">
           
         {/* Username */}
         <div>
@@ -125,6 +152,7 @@ export function SignupInput() {
 
           {/* Login button */}
           <button
+          disabled={loading}
             type="submit"
             className="w-full rounded-xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800 active:scale-[0.99]"
           >
@@ -151,3 +179,7 @@ export function SignupInput() {
     </main>
   );
 }
+function setError(arg0: any) {
+  throw new Error("Function not implemented.");
+}
+
