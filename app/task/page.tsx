@@ -1,0 +1,157 @@
+import { Navbar } from "../../components/navbar/goalNavbar";
+import { TaskNavbar } from "../../components/taskSection";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { Token } from "@/lib/token";
+import User from "@/models/user";
+import Todo from "@/models/todo";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { connectDB } from "@/lib/mongodb";
+import { TodoList } from "@/components/tasks";
+import { InputTodo } from "@/components/input";
+import { CalendarPopup } from "../../components/calander";
+
+type TasksProps = {
+    searchParams: Promise<{
+        date?: string;
+        complete?: string;
+    }>;
+};
+
+
+interface Payload extends JwtPayload {
+    id: string;
+    username: string;
+    goal:string;
+}
+
+export default async function Tasks({ searchParams }: TasksProps) {
+    const { date,complete } = await searchParams
+
+    await connectDB();
+
+    const isComplete = complete === "true";
+    console.log("complete: ", isComplete);
+    
+
+    const res = await GetTask(date ?? "", isComplete);
+    console.log(res);
+
+    const percen = res.todos === 0 ? 0 : Math.floor(res.complete/res.todos*100)
+    
+    
+
+    return(
+        <>
+        <Navbar title={res.goal} percentage={percen} />
+        <TaskNavbar completed={res.complete} uncompleted={!isComplete ? res.uncomplete : null} date={date ?? ""} taskStatus={isComplete} />
+        <TodoList todos={res.tasks} />
+        <InputTodo date={date} />
+        {/* <CalendarPopup open={true} /> */}
+        </>
+
+    ) 
+}
+
+
+async function GetTask(date: string, complete: boolean) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+   
+
+    if (!token) {
+        redirect("/login");
+    }
+
+    let decoded: string | JwtPayload;
+
+    try {
+        decoded = Token.verify(token);
+    } catch {
+        redirect("/login");
+    }
+
+    if (
+        typeof decoded === "string" ||
+        typeof decoded.id !== "string"
+    ) {
+        redirect("/login");
+    }
+
+    const payload = decoded as Payload;
+
+    const user = await User.findById(payload.id).lean();
+
+    if (!user) {
+        redirect("/login");
+    }
+
+    const todos = await Todo.find({
+        user: user._id,
+        date,
+    }).lean().then(docs => docs.map(doc => {
+        // Convert to plain object, handling ObjectId fields
+        const plain = doc as any;
+        return {
+            ...plain,
+            _id: plain._id?.toString() || plain._id,
+            user: plain.user?.toString() || plain.user,
+            createdAt: plain.createdAt?.toString() || plain.createdAt,
+            updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
+        };
+    }));
+
+    if( complete ) {
+        const completed = await Todo.find({
+            user: user._id,
+            date,
+            completed: complete
+        }).lean().then(docs => docs.map(doc => {
+            const plain = doc as any;
+            return {
+                ...plain,
+                _id: plain._id?.toString() || plain._id,
+                user: plain.user?.toString() || plain.user,
+                createdAt: plain.createdAt?.toString() || plain.createdAt,
+                updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
+            };
+        }))
+
+        return {
+            todos: todos.length,
+            complete: completed.length,
+            uncomplete: todos.length - completed.length,
+            goal: user.goal,
+            tasks: completed
+        }
+    }
+    else {
+        const uncompleted = await Todo.find({
+            user: user._id,
+            date,
+            completed: complete
+        }).lean().then(docs => docs.map(doc => {
+            const plain = doc as any;
+            return {
+                ...plain,
+                _id: plain._id?.toString() || plain._id,
+                user: plain.user?.toString() || plain.user,
+                createdAt: plain.createdAt?.toString() || plain.createdAt,
+                updatedAt: plain.updatedAt?.toString() || plain.updatedAt,
+            };
+        }))
+
+        return {
+            todos: todos.length,
+            complete: todos.length - uncompleted.length,
+            uncomplete: uncompleted.length,
+            goal: user.goal,
+            tasks: uncompleted
+        }
+    }
+
+
+}
+
+
