@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 export default async function Home() {
+    await connection()
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 

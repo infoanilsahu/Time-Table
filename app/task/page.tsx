@@ -5,11 +5,11 @@ import { cookies } from "next/headers";
 import { Token } from "@/lib/token";
 import User from "@/models/user";
 import Todo from "@/models/todo";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 import { connectDB } from "@/lib/mongodb";
 import { TodoList } from "@/components/tasks";
 import { InputTodo } from "@/components/input";
-import { CalendarPopup } from "../../components/calander";
+import { connection } from "next/server";
 
 type TasksProps = {
     searchParams: Promise<{
@@ -26,6 +26,8 @@ interface Payload extends JwtPayload {
 }
 
 export default async function Tasks({ searchParams }: TasksProps) {
+    await connection()
+
     const { date,complete } = await searchParams
 
     await connectDB();
