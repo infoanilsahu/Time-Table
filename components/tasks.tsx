@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Trash } from "lucide-react";
 import { api } from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Delete from "../public/delete.svg"
+import Award from "../public/award.svg"
 
 type Todo = {
   _id: string | { toString(): string };
@@ -99,6 +99,9 @@ export function TodoList({
 
               <div className="flex shrink-0 items-center gap-3">
                 <span className={`${todo.priority === "high" ? "bg-red-600 text-red-600" : todo.priority === "medium" ? "bg-yellow-400 text-yellow-400" : todo.priority === "low" ?  "bg-green-500 text-green-500" : "bg-none hidden"} w-5 rounded-2xl`}>.</span>
+                {todo.completed && <span className="bg-black p-1 rounded-lg">
+                  <Image width={20} src={Award} alt="" />
+                </span>}
               </div>
             </div>
 
